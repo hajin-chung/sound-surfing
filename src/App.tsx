@@ -1,9 +1,16 @@
 import { createSignal, onMount } from "solid-js";
 import { Wave } from "./wave";
+import playIcon from "./assets/play.svg";
+import pauseIcon from "./assets/pause.svg";
+import uploadIcon from "./assets/upload.svg";
 
 function App() {
   const frameRate = 30;
+  const [url, setUrl] = createSignal(
+    "https://cdn.pixabay.com/audio/2023/07/24/audio_65d744b9d0.mp3"
+  );
   const [wave, setWave] = createSignal<Wave>();
+  const playing = () => wave()?.playing();
   let canvasRef: HTMLCanvasElement | undefined;
 
   onMount(() => {
@@ -14,26 +21,51 @@ function App() {
     canvasRef.width = width;
     canvasRef.height = height;
 
-    const wave = new Wave(
-      "https://cdn.pixabay.com/audio/2023/07/24/audio_65d744b9d0.mp3",
-      canvasRef
-    );
+    const wave = new Wave(url(), canvasRef);
     setWave(wave);
     setInterval(() => {}, 1000 / frameRate);
   });
+
+  const stop = () => {
+    wave()?.stop();
+  };
+
+  const play = () => {
+    if (!canvasRef) return;
+
+    if (!wave()) {
+      setWave(new Wave(url(), canvasRef));
+    }
+
+    wave()?.play();
+  };
+
+  const upload = () => {};
 
   return (
     <main class="w-full h-screen text-white flex flex-col items-center bg-black">
       <div class="h-10" />
       <p class="text-2xl italic font-bold">Sound Surfing</p>
       <div class="h-4" />
-      <div class="p-4 bg-gray-800 rounded-lg flex gap-4">
-        {wave()?.playing() ? (
-          <button onClick={() => wave()?.stop()}>s</button>
+      <div class="p-4 flex items-center gap-4 max-w-lg w-full">
+        <input
+          class="outline-none border-[1px] border-white p-1 font-white bg-black w-full"
+          type="text"
+          value={url()}
+          onInput={(e) => setUrl(e.target.value)}
+        />
+        {playing() ? (
+          <button onClick={stop} class="w-8 h-8 p-1">
+            <img src={pauseIcon} class="w-full h-full" />
+          </button>
         ) : (
-          <button onClick={() => wave()?.play()}>p</button>
+          <button onClick={play} class="w-8 h-8 p-1">
+            <img src={playIcon} class="w-full h-full" />
+          </button>
         )}
-        <button>o</button>
+        <button onClick={upload} class="w-8 h-8 p-1">
+          <img src={uploadIcon} class="w-full h-full" />
+        </button>
       </div>
       <div class="h-4" />
       <div class="max-w-xl w-full h-full border-white border-[1px]">
