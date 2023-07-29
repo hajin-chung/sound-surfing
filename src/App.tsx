@@ -1,13 +1,12 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onCleanup, onMount } from "solid-js";
 import { Wave } from "./wave";
 import playIcon from "./assets/play.svg";
 import pauseIcon from "./assets/pause.svg";
 import uploadIcon from "./assets/upload.svg";
 
 function App() {
-  const frameRate = 30;
   const [url, setUrl] = createSignal(
-    "https://cdn.pixabay.com/audio/2023/07/24/audio_65d744b9d0.mp3"
+    "https://cdn.pixabay.com/audio/2023/03/02/audio_83db199f04.mp3"
   );
   const [wave, setWave] = createSignal<Wave>();
   const playing = () => wave()?.playing();
@@ -23,7 +22,10 @@ function App() {
 
     const wave = new Wave(url(), canvasRef);
     setWave(wave);
-    setInterval(() => {}, 1000 / frameRate);
+  });
+
+  onCleanup(() => {
+    clearInterval(wave()?.loop);
   });
 
   const stop = () => {
@@ -33,7 +35,8 @@ function App() {
   const play = () => {
     if (!canvasRef) return;
 
-    if (!wave()) {
+    if (!wave() || wave()?.ended()) {
+      clearInterval(wave()?.loop);
       setWave(new Wave(url(), canvasRef));
     }
 

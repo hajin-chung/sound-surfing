@@ -7,6 +7,8 @@ export class Wave {
   setLoading: (v: boolean) => void;
   playing: () => boolean;
   setPlaying: (v: boolean) => void;
+  ended: () => boolean;
+  setEnded: (v: boolean) => void;
   audioContext: AudioContext;
   analyser: AnalyserNode;
   source: AudioBufferSourceNode;
@@ -18,14 +20,19 @@ export class Wave {
   yOffset: number;
   ySpeed: number;
 
+  loop: number | undefined;
+
   constructor(url: string, canvas: HTMLCanvasElement) {
     const [loading, setLoading] = createSignal(false);
     const [playing, setPlaying] = createSignal(false);
+    const [ended, setEnded] = createSignal(false);
 
     this.loading = loading;
     this.setLoading = setLoading;
     this.playing = playing;
     this.setPlaying = setPlaying;
+    this.ended = ended;
+    this.setEnded = setEnded;
 
     this.waves = [];
     this.waveGap = 20;
@@ -54,9 +61,10 @@ export class Wave {
     this.source.buffer = audioBuffer;
     this.source.connect(this.analyser);
     this.setLoading(false);
+    this.source.onended = () => this.onEnded();
 
     let time = performance.now();
-    setInterval(() => {
+    this.loop = setInterval(() => {
       const currentTime = performance.now();
       const dt = currentTime - time;
       this.draw(dt / 1000);
@@ -79,6 +87,12 @@ export class Wave {
 
     this.setPlaying(false);
     this.audioContext.suspend();
+  }
+
+  onEnded() {
+    console.log("ended!")
+    this.setEnded(true);
+    this.setPlaying(false);
   }
 
   updateWaves() {
