@@ -33,7 +33,7 @@ export class Wave {
     const [playing, setPlaying] = createSignal(false);
     const [ended, setEnded] = createSignal(false);
     const [gain, setGain] = createSignal(100);
-    const [intensity, setIntensity] = createSignal(10);
+    const [intensity, setIntensity] = createSignal(1);
 
     this.loading = loading;
     this.setLoading = setLoading;
@@ -151,7 +151,7 @@ export class Wave {
         const y =
           this.height -
           (this.waveGap * waveIndex +
-            (v / 255) * this.waveGap * this.intensity() / 10 +
+            (v / 255) * this.waveGap * this.intensity() +
             this.yOffset);
 
         if (idx === 0) {
