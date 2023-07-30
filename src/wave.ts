@@ -122,7 +122,7 @@ export class Wave {
       this.updateWaves();
     }
 
-    ctx.clearRect(0, 0, this.width, this.height);
+    const wavePaths: { stroke: Path2D; fill: Path2D }[] = [];
     const wavesLength = this.waves.length;
     this.waves.forEach((wave, _waveIndex) => {
       const length = wave.length;
@@ -143,20 +143,26 @@ export class Wave {
           wavePath.lineTo(x, y);
         }
       });
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
-      ctx.stroke(wavePath);
-      wavePath.lineTo(
+      const fillPath = new Path2D(wavePath);
+      fillPath.lineTo(
         this.width,
         this.height - (this.waveGap * waveIndex + this.yOffset)
       );
-      wavePath.lineTo(
+      fillPath.lineTo(
         0,
         this.height - (this.waveGap * waveIndex + this.yOffset)
       );
-      wavePath.closePath();
-      ctx.fillStyle = "#000";
-      ctx.fill(wavePath);
+      fillPath.closePath();
+      wavePaths.push({ stroke: wavePath, fill: fillPath });
+    });
+
+    ctx.clearRect(0, 0, this.width, this.height);
+    ctx.fillStyle = "#000";
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    wavePaths.forEach(({ stroke, fill }) => {
+      ctx.fill(fill);
+      ctx.stroke(stroke);
     });
   }
 }

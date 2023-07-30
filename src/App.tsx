@@ -19,15 +19,14 @@ function App() {
 
     canvasRef.width = width;
     canvasRef.height = height;
-
-    const wave = new Wave(url(), canvasRef);
-    setWave(wave);
   });
 
-  onCleanup(() => {
+  const cleanup = () => {
     const handle = wave()?.loop;
     if (handle) cancelAnimationFrame(handle);
-  });
+  };
+
+  onCleanup(cleanup);
 
   const stop = () => {
     wave()?.stop();
@@ -37,7 +36,7 @@ function App() {
     if (!canvasRef) return;
 
     if (!wave() || wave()?.ended()) {
-      clearInterval(wave()?.loop);
+      cleanup();
       setWave(new Wave(url(), canvasRef));
     }
 
@@ -56,7 +55,7 @@ function App() {
           class="outline-none border-[1px] border-white p-1 font-white bg-black w-full"
           type="text"
           value={url()}
-          onInput={(e) => setUrl(e.target.value)}
+          onInput={(e) => setUrl(e.currentTarget.value)}
         />
         {playing() ? (
           <button onClick={stop} class="w-8 h-8 p-1">
