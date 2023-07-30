@@ -6,7 +6,7 @@ import uploadIcon from "./assets/upload.svg";
 
 function App() {
   const [url, setUrl] = createSignal(
-    "https://cdn.pixabay.com/audio/2023/03/02/audio_83db199f04.mp3"
+    "https://cdn.pixabay.com/audio/2021/11/01/audio_67c5757bac.mp3"
   );
   const [wave, setWave] = createSignal<Wave>();
   const playing = () => wave()?.playing();
