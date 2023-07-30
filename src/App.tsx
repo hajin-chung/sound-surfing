@@ -25,7 +25,8 @@ function App() {
   });
 
   onCleanup(() => {
-    clearInterval(wave()?.loop);
+    const handle = wave()?.loop;
+    if (handle) cancelAnimationFrame(handle);
   });
 
   const stop = () => {

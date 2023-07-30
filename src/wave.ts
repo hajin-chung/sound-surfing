@@ -19,6 +19,7 @@ export class Wave {
   height: number;
   yOffset: number;
   ySpeed: number;
+  time: number;
 
   loop: number | undefined;
 
@@ -40,17 +41,20 @@ export class Wave {
     this.audioContext = new AudioContext();
     this.analyser = this.audioContext.createAnalyser();
     this.analyser.connect(this.audioContext.destination);
-    this.analyser.fftSize = 2048;
+    this.analyser.fftSize = 512;
     this.source = this.audioContext.createBufferSource();
 
     this.loadAudio(url);
 
     this.canvas = canvas;
     this.canvasContext = canvas.getContext("2d")!;
+    // https://stackoverflow.com/questions/4261090/html5-canvas-and-anti-aliasing
+    this.canvasContext.translate(0.5, 0.5);
     this.width = canvas.width;
     this.height = canvas.height;
     this.yOffset = 0;
     this.ySpeed = 100;
+    this.time = performance.now();
   }
 
   async loadAudio(url: string) {
@@ -63,13 +67,8 @@ export class Wave {
     this.setLoading(false);
     this.source.onended = () => this.onEnded();
 
-    let time = performance.now();
-    this.loop = setInterval(() => {
-      const currentTime = performance.now();
-      const dt = currentTime - time;
-      this.draw(dt / 1000);
-      time = currentTime;
-    }, 1000 / 60);
+    this.time = performance.now();
+    this.loop = requestAnimationFrame(this.step.bind(this));
   }
 
   play() {
@@ -90,9 +89,16 @@ export class Wave {
   }
 
   onEnded() {
-    console.log("ended!")
+    console.log("ended!");
     this.setEnded(true);
     this.setPlaying(false);
+  }
+
+  step(currentTime: number) {
+    const dt = currentTime - this.time;
+    this.time = currentTime;
+    this.draw(dt / 1000);
+    requestAnimationFrame(this.step.bind(this));
   }
 
   updateWaves() {
@@ -122,21 +128,35 @@ export class Wave {
       const length = wave.length;
       const waveIndex = wavesLength - _waveIndex - 1;
 
-      ctx.beginPath();
+      const wavePath = new Path2D();
       wave.forEach((v, idx) => {
-        const x = (this.width / length) * idx;
+        const x = (this.width / (length - 1)) * idx;
         const y =
           this.height -
-          (this.waveGap * waveIndex + (v / 255) * this.waveGap + this.yOffset);
+          (this.waveGap * waveIndex +
+            (v / 255) * this.waveGap * 3 +
+            this.yOffset);
 
         if (idx === 0) {
-          ctx.moveTo(x, y);
+          wavePath.moveTo(x, y);
         } else {
-          ctx.lineTo(x, y);
+          wavePath.lineTo(x, y);
         }
       });
       ctx.strokeStyle = "#fff";
-      ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.stroke(wavePath);
+      wavePath.lineTo(
+        this.width,
+        this.height - (this.waveGap * waveIndex + this.yOffset)
+      );
+      wavePath.lineTo(
+        0,
+        this.height - (this.waveGap * waveIndex + this.yOffset)
+      );
+      wavePath.closePath();
+      ctx.fillStyle = "#000";
+      ctx.fill(wavePath);
     });
   }
 }
