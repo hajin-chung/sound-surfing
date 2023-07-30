@@ -3,6 +3,7 @@ import { Wave } from "./wave";
 import playIcon from "./assets/play.svg";
 import pauseIcon from "./assets/pause.svg";
 import uploadIcon from "./assets/upload.svg";
+import "./App.css";
 
 function App() {
   const [url, setUrl] = createSignal(
@@ -46,11 +47,11 @@ function App() {
   const upload = () => {};
 
   return (
-    <main class="w-full h-screen text-white flex flex-col items-center bg-black">
+    <main class="w-full h-screen px-4 text-white flex flex-col items-center bg-black">
       <div class="h-10" />
       <p class="text-2xl italic font-bold">Sound Surfing</p>
       <div class="h-4" />
-      <div class="p-4 flex items-center gap-4 max-w-lg w-full">
+      <div class="flex items-center gap-4 max-w-lg w-full">
         <input
           class="outline-none border-[1px] border-white p-1 font-white bg-black w-full"
           type="text"
@@ -69,6 +70,33 @@ function App() {
         <button onClick={upload} class="w-8 h-8 p-1">
           <img src={uploadIcon} class="w-full h-full" />
         </button>
+      </div>
+      <div class="h-2" />
+      <div class="flex items-center gap-4 max-w-lg w-full justify-between flex-wrap">
+        <div class="flex gap-4">
+          <p>volume</p>
+          <input
+            class="range"
+            type="range"
+            min={0}
+            max={100}
+            value={wave()?.volume()}
+            onInput={(e) => wave()?.setVolume(parseInt(e.target.value))}
+          />
+          <p>{wave()?.volume() ?? 50}</p>
+        </div>
+        <div class="flex gap-4">
+          <p>intensity</p>
+          <input
+            class="range"
+            type="range"
+            min={0}
+            max={100}
+            value={wave()?.intensity() ?? 10}
+            onInput={(e) => wave()?.setIntensity(parseInt(e.target.value))}
+          />
+          <p>{wave()?.intensity() ?? 10}</p>
+        </div>
       </div>
       <div class="h-4" />
       <div class="max-w-xl w-full h-full border-white border-[1px]">

@@ -9,7 +9,12 @@ export class Wave {
   setPlaying: (v: boolean) => void;
   ended: () => boolean;
   setEnded: (v: boolean) => void;
+  volume: () => number;
+  setGain: (v: number) => void;
+  intensity: () => number;
+  setIntensity: (v: number) => void;
   audioContext: AudioContext;
+  gainNode: GainNode;
   analyser: AnalyserNode;
   source: AudioBufferSourceNode;
 
@@ -27,6 +32,8 @@ export class Wave {
     const [loading, setLoading] = createSignal(false);
     const [playing, setPlaying] = createSignal(false);
     const [ended, setEnded] = createSignal(false);
+    const [gain, setGain] = createSignal(100);
+    const [intensity, setIntensity] = createSignal(10);
 
     this.loading = loading;
     this.setLoading = setLoading;
@@ -34,6 +41,10 @@ export class Wave {
     this.setPlaying = setPlaying;
     this.ended = ended;
     this.setEnded = setEnded;
+    this.volume = gain;
+    this.setGain = setGain;
+    this.intensity = intensity;
+    this.setIntensity = setIntensity;
 
     this.waves = [];
     this.waveGap = 20;
@@ -41,6 +52,8 @@ export class Wave {
     this.audioContext = new AudioContext();
     this.analyser = this.audioContext.createAnalyser();
     this.analyser.connect(this.audioContext.destination);
+    this.gainNode = this.audioContext.createGain();
+    this.gainNode.connect(this.analyser);
     this.analyser.fftSize = 512;
     this.source = this.audioContext.createBufferSource();
 
@@ -63,7 +76,7 @@ export class Wave {
     const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
     this.source.buffer = audioBuffer;
-    this.source.connect(this.analyser);
+    this.source.connect(this.gainNode);
     this.setLoading(false);
     this.source.onended = () => this.onEnded();
 
@@ -88,8 +101,12 @@ export class Wave {
     this.audioContext.suspend();
   }
 
+  setVolume(v: number) {
+    this.setGain(v);
+    this.gainNode.gain.value = v / 100;
+  }
+
   onEnded() {
-    console.log("ended!");
     this.setEnded(true);
     this.setPlaying(false);
   }
@@ -134,7 +151,7 @@ export class Wave {
         const y =
           this.height -
           (this.waveGap * waveIndex +
-            (v / 255) * this.waveGap * 3 +
+            (v / 255) * this.waveGap * this.intensity() / 10 +
             this.yOffset);
 
         if (idx === 0) {
