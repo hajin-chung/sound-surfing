@@ -110,10 +110,10 @@ function App() {
             min={0.0}
             max={10.0}
             step={0.1}
-            value={wave()?.intensity() ?? 1}
+            value={wave()?.intensity() ?? 4}
             onInput={(e) => wave()?.setIntensity(parseInt(e.target.value))}
           />
-          <p>{wave()?.intensity() ?? 1}</p>
+          <p>{wave()?.intensity() ?? 4}</p>
         </div>
       </div>
       <div class="h-4" />

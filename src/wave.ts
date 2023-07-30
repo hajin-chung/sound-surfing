@@ -37,7 +37,7 @@ export class Wave {
     const [playing, setPlaying] = createSignal(false);
     const [ended, setEnded] = createSignal(false);
     const [gain, setGain] = createSignal(100);
-    const [intensity, setIntensity] = createSignal(1);
+    const [intensity, setIntensity] = createSignal(4);
 
     this.loading = loading;
     this.setLoading = setLoading;
