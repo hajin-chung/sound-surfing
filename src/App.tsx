@@ -3,12 +3,15 @@ import { Wave } from "./wave";
 import playIcon from "./assets/play.svg";
 import pauseIcon from "./assets/pause.svg";
 import uploadIcon from "./assets/upload.svg";
+import resetIcon from "./assets/reset.svg";
 import "./App.css";
+import { JSX } from "solid-js/h/jsx-runtime";
 
 function App() {
-  const [url, setUrl] = createSignal(
+  const [url, setUrl] = createSignal<string | undefined>(
     "https://cdn.pixabay.com/audio/2021/11/01/audio_67c5757bac.mp3"
   );
+  const [file, setFile] = createSignal<File>();
   const [wave, setWave] = createSignal<Wave>();
   const playing = () => wave()?.playing();
   let canvasRef: HTMLCanvasElement | undefined;
@@ -23,6 +26,7 @@ function App() {
   });
 
   const cleanup = () => {
+    wave()?.audioContext.close();
     const handle = wave()?.loop;
     if (handle) cancelAnimationFrame(handle);
   };
@@ -38,13 +42,22 @@ function App() {
 
     if (!wave() || wave()?.ended()) {
       cleanup();
-      setWave(new Wave(url(), canvasRef));
+      setWave(new Wave(url(), file(), canvasRef));
     }
 
     wave()?.play();
   };
 
-  const upload = () => {};
+  const reset = () => {
+    cleanup();
+    setWave(undefined);
+  }
+
+  const upload: JSX.EventHandler<HTMLInputElement, InputEvent> = async (e) => {
+    const file = e.currentTarget.files![0];
+    setUrl(undefined);
+    setFile(file);
+  };
 
   return (
     <main class="w-full h-screen px-4 text-white flex flex-col items-center bg-black">
@@ -67,9 +80,13 @@ function App() {
             <img src={playIcon} class="w-full h-full" />
           </button>
         )}
-        <button onClick={upload} class="w-8 h-8 p-1">
-          <img src={uploadIcon} class="w-full h-full" />
+        <button onClick={reset} class="w-8 h-8 p-1">
+          <img src={resetIcon} class="w-full h-full" />
         </button>
+        <label class="w-8 h-8 p-1 cursor-pointer" for="upload">
+          <img src={uploadIcon} class="w-full h-full" />
+        </label>
+        <input type="file" accept="audio/*" id="upload" onInput={upload} hidden />
       </div>
       <div class="h-2" />
       <div class="flex items-center gap-4 max-w-lg w-full justify-between flex-wrap">

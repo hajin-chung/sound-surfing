@@ -28,7 +28,11 @@ export class Wave {
 
   loop: number | undefined;
 
-  constructor(url: string, canvas: HTMLCanvasElement) {
+  constructor(
+    url: string | undefined,
+    file: File | undefined,
+    canvas: HTMLCanvasElement
+  ) {
     const [loading, setLoading] = createSignal(false);
     const [playing, setPlaying] = createSignal(false);
     const [ended, setEnded] = createSignal(false);
@@ -57,7 +61,8 @@ export class Wave {
     this.analyser.fftSize = 512;
     this.source = this.audioContext.createBufferSource();
 
-    this.loadAudio(url);
+    if (url) this.loadAudioFromUrl(url);
+    if (file) this.loadAudioFromFile(file);
 
     this.canvas = canvas;
     this.canvasContext = canvas.getContext("2d")!;
@@ -70,9 +75,22 @@ export class Wave {
     this.time = performance.now();
   }
 
-  async loadAudio(url: string) {
+  async loadAudioFromUrl(url: string) {
     const res = await fetch(url);
     const arrayBuffer = await res.arrayBuffer();
+    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+    this.source.buffer = audioBuffer;
+    this.source.connect(this.gainNode);
+    this.setLoading(false);
+    this.source.onended = () => this.onEnded();
+
+    this.time = performance.now();
+    this.loop = requestAnimationFrame(this.step.bind(this));
+  }
+  
+  async loadAudioFromFile(file: File) {
+    const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
     this.source.buffer = audioBuffer;
