@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build-gh": "tsc && vite build --base=/sound-surfing",
+    "build-cf": "tsc && vite build --base=/",
     "preview": "vite preview"
   },
   "dependencies": {
