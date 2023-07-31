@@ -6,4 +6,4 @@ inspired by unknown pleasures joy division album cover
 
 - [x] volume slider
 - [x] upload mp3
-- [ ] separate wave draws
+- [x] separate wave draws

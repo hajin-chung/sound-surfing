@@ -6,6 +6,7 @@ import uploadIcon from "./assets/upload.svg";
 import resetIcon from "./assets/reset.svg";
 import "./App.css";
 import { JSX } from "solid-js/h/jsx-runtime";
+import { initCanvas } from "./canvas";
 
 function App() {
   const [url, setUrl] = createSignal<string | undefined>(
@@ -13,6 +14,7 @@ function App() {
   );
   const [file, setFile] = createSignal<File>();
   const [wave, setWave] = createSignal<Wave>();
+  const [intensity, setIntensity] = createSignal(4);
   const playing = () => wave()?.playing();
   let canvasRef: HTMLCanvasElement | undefined;
 
@@ -23,6 +25,8 @@ function App() {
 
     canvasRef.width = width;
     canvasRef.height = height;
+
+    initCanvas(canvasRef, intensity);
   });
 
   const cleanup = () => {
@@ -42,7 +46,7 @@ function App() {
 
     if (!wave() || wave()?.ended()) {
       cleanup();
-      setWave(new Wave(url(), file(), canvasRef));
+      setWave(new Wave(url(), file()));
     }
 
     wave()?.play();
@@ -51,7 +55,7 @@ function App() {
   const reset = () => {
     cleanup();
     setWave(undefined);
-  }
+  };
 
   const upload: JSX.EventHandler<HTMLInputElement, InputEvent> = async (e) => {
     const file = e.currentTarget.files![0];
@@ -86,7 +90,13 @@ function App() {
         <label class="w-8 h-8 p-1 cursor-pointer" for="upload">
           <img src={uploadIcon} class="w-full h-full" />
         </label>
-        <input type="file" accept="audio/*" id="upload" onInput={upload} hidden />
+        <input
+          type="file"
+          accept="audio/*"
+          id="upload"
+          onInput={upload}
+          hidden
+        />
       </div>
       <div class="h-2" />
       <div class="flex items-center gap-4 max-w-lg w-full justify-between flex-wrap">
@@ -110,10 +120,10 @@ function App() {
             min={0.0}
             max={10.0}
             step={0.1}
-            value={wave()?.intensity() ?? 4}
-            onInput={(e) => wave()?.setIntensity(parseInt(e.target.value))}
+            value={intensity()}
+            onInput={(e) => setIntensity(parseInt(e.target.value))}
           />
-          <p>{wave()?.intensity() ?? 4}</p>
+          <p>{intensity()}</p>
         </div>
       </div>
       <div class="h-4" />
